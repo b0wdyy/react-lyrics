@@ -5,7 +5,8 @@ import "./app.scss";
 function App() {
   const [data, setData] = useState({});
   const [error, setError] = useState();
-  const [search, setSearch] = useState("");
+  const [artist, setArtist] = useState("");
+  const [song, setSong] = useState("");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -16,19 +17,36 @@ function App() {
 
         setData(data);
       } catch (error) {
-        console.log(error);
         setError("Lyrics not found. Check your search term.");
       }
     };
 
     fetchData();
   }, []);
+
+  const searchLyrics = async (e) => {
+    const link = `https://api.lyrics.ovh/v1/${artist}/${song}`;
+
+    e.preventDefault();
+
+    try {
+      const response = await axios.get(link);
+      const data = await response.data;
+
+      setData(data);
+    } catch {
+      setError("Lyrics not found. Check your search term.");
+    }
+  };
+
   if (data && !error) {
     return (
       <div>
-        <form>
-          <p>Search the lyrics you want to know</p>
-          <input type="text" onChange={(e) => setSearch(e.target.value)} />
+        <form onSubmit={searchLyrics}>
+          <p>Artist</p>
+          <input type="text" onChange={(e) => setArtist(e.target.value)} />
+          <p>Song</p>
+          <input type="text" onChange={(e) => setSong(e.target.value)} />
           <input type="submit" value="Search lyrics" />
         </form>
 
@@ -38,12 +56,14 @@ function App() {
   } else {
     return (
       <div>
-        <form>
-          <p>Search the lyrics you want to know</p>
-          <input type="text" onChange={(e) => setSearch(e.target.value)} />
+        <form onSubmit={searchLyrics}>
+          <p>Artist</p>
+          <input type="text" onChange={(e) => setArtist(e.target.value)} />
+          <p>Song</p>
+          <input type="text" onChange={(e) => setSong(e.target.value)} />
           <input type="submit" value="Search lyrics" />
         </form>
-        <p>{error}</p>
+        {error ? <p>{error}</p> : <p>{data.lyrics}</p>}
       </div>
     );
   }
